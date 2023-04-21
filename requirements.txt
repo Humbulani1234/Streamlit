@@ -29,3 +29,4 @@ threadpoolctl==3.1.0
 whitenoise==6.4.0
 streamlit==1.21.0
 kmodes==0.12.2
+seaborn==0.12.2
