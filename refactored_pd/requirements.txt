@@ -1,0 +1,12 @@
+
+cycler
+kiwisolver
+matplotlib
+numpy
+pandas
+patsy 
+scikit-learn
+statsmodels
+threadpoolctl 
+whitenoise
+streamlit
