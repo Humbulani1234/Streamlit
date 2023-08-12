@@ -39,81 +39,71 @@ warnings.filterwarnings("ignore")
 
 class OneHotEncoding(Base):
 
-    def __init__(self, custom_rcParams, df_nomiss_cat, which):
+    def __init__(self, custom_rcParams, df_nomiss_cat, type_):
 
         super().__init__(custom_rcParams)
-
         self.df_nomiss_cat = df_nomiss_cat
-        self.which = which
+        self.type = type_
 
-    def one_hot_encoding(self, which):
+    def onehot_encoding(self):
+    
+        '''One Hot Encoding Function'''
 
-        if self.which == False:
+        if self.type == "machine":
+    
+            encoded_dataframes = []
 
-            def onehot_encoding_machine(self):
-            
-                '''One Hot Encoding Function'''
-            
-                encoded_dataframes = []
+            for col in self.df_nomiss_cat.columns:
 
-                for col in self.df_nomiss_cat.columns:
-                    y = pd.get_dummies(self.df_nomiss_cat[col])
-                    encoded_dataframes.append(y)
+                y = pd.get_dummies(self.df_nomiss_cat[col]).astype(int)
+                encoded_dataframes.append(y)
 
-                df_cat_onehotenc = pd.concat(encoded_dataframes, axis = 1)
+            df_cat_onehotenc = pd.concat(encoded_dataframes, axis = 1)
+
+            return df_cat_onehotenc
+
+        elif self.type == "statistics":
+        
+            encoded_dataframes = []
+
+            for col in self.df_nomiss_cat.columns:
                 
-                return df_cat_onehotenc
+                y = pd.get_dummies(self.df_nomiss_cat[col]).astype(int)
+                n = len(pd.unique(self.df_nomiss_cat[col])) 
+                self.df_nomiss_cat_ = y.drop(y.columns[n-1], axis=1) 
+                encoded_dataframes.append(self.df_nomiss_cat_)
 
-        if self.which == True:
+            df_cat_onehotenc = pd.concat(encoded_dataframes, axis = 1)
 
-            def onehot_encoding_statistics(self):
-            
-                '''One Hot Encoding Function'''
-            
-                encoded_dataframes = []
-
-                for col in self.df_nomiss_cat.columns:
-                    y = pd.get_dummies(self.df_nomiss_cat[col])
-                    n = len(pd.unique(self.df_nomiss_cat[col])) 
-                    self.df_nomiss_cat = y.drop(y.columns[n-1], axis=1) 
-                    encoded_dataframes.append(self.df_nomiss_cat)
-
-                df_cat_onehotenc = pd.concat(encoded_dataframes, axis = 1)
-                
-                return df_cat_onehotenc
+            return df_cat_onehotenc
 
     def create_xy_frames(self, df_float, target):
-        
-        if self.which == True:
 
-            df_cat = self.one_hot_encoding(True)
+        if self.type == "machine":
 
+            df_cat = self.onehot_encoding()
             df_total_partition = pd.concat([df_float, df_cat], axis = 1)
             x = df_total_partition.drop(labels=[target.name], axis=1)
             y = df_total_partition[target.name]
             
             return x, y
 
-        if self.which == False:
+        elif self.type == "statistics":
 
-            df_cat = self.one_hot_encoding(False)
-
+            df_cat = self.onehot_encoding()
             df_total_partition = pd.concat([df_float, df_cat], axis = 1)
             x = df_total_partition.drop(labels=[target.name], axis=1)
             y = df_total_partition[target.name]
-
+            
             return x, y
 
     def sample_imbalance(self, df_float, target):
     
         x, y = self.create_xy_frames(df_float, target)
-
-        self.fig, self.axs = plt.subplots(1,1)
-        
+        self.fig, self.axs = plt.subplots(1,1)        
         self.axs.hist(y, weights = np.ones(len(y))/len(y))
         super().plotting("Normality Test", "x", "y")
         self.axs.hist(y, weights = np.ones(len(y))/len(y))
-
         self.axs.yaxis.set_major_formatter(PercentFormatter(1))
         
         return self.fig
@@ -121,73 +111,32 @@ class OneHotEncoding(Base):
     def split_xtrain_ytrain(self, df_float, target):
     
         x, y = self.create_xy_frames(df_float, target)
-
         x_train_pd, x_test_pd, y_train_pd, y_test_pd = train_test_split(x, y, test_size=0.3, random_state=42)
-
         x_train_pd = x_train_pd.drop(labels=["_freq_"], axis=1) # temp, for mach it has to be dropped
-
         x_test_pd = x_test_pd.drop(labels=["_freq_"], axis=1) # temp
-
-        
+   
         return x_train_pd, x_test_pd, y_train_pd, y_test_pd
 
 # ---------------------------------------------------------Testing-------------------------------------------------------
 
-
 if __name__ == "__main__":
 
-
     file_path = "./KGB.sas7bdat"
-    data_types, df_loan_categorical, df_loan_float = data_cleaning(file_path)    
+    data_types, df_loan_categorical, df_loan_float = data_cleaning(file_path)
+    #print(df_loan_float)    
     miss = ImputationCat(df_cat=df_loan_categorical)
     imputer_cat = miss.simple_imputer_mode()
-    print(imputer_cat)
+    #print(imputer_cat)
     to_view = miss.concatenate_total_df(df_loan_float, imputer_cat)
 
     #print(to_use)
 
     custom_rcParams = {"figure.figsize": (8, 6), "axes.labelsize": 12}
 
-    # x_test = X_test 
-    # x_train = X_train
-    # y_test = Y_test
-    # y_train = Y_train.to_frame()
-    # threshold = 0.47
-    # func = GLM_Binomial_fit
-
-    instance = OneHotEncoding(custom_rcParams, imputer_cat, True)
-    #print(instance.df_nomiss_cat)
-    y = instance.split_xtrain_ytrain(df_loan_float, target=df_loan_float["GB"])[1]
-    si = instance.sample_imbalance(df_loan_float, df_loan_float["GB"])
-    plt.show()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    instance = OneHotEncoding(custom_rcParams, imputer_cat, "machine")
+    # print(instance.df_cat)
+    c = instance.onehot_encoding()
+    #print(c)
+    #si = instance.sample_imbalance(df_loan_float, df_loan_float["GB"])
+    #plt.show()
 

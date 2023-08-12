@@ -1,5 +1,4 @@
 
-
 import streamlit as st 
 import matplotlib.pyplot as plt
 import warnings
@@ -37,23 +36,9 @@ pd.set_option("display.max_rows", 3000)
 pd.set_option("display.float_format", lambda x: "%.0f" %x)
 warnings.filterwarnings("ignore")
 
-# -------------------------------------------------------------------BaseClass--------------------------------------------------------
+# ---------------------------------------------------------------DecisionStream--------------------------------------------------
 
-class BaseStreamlit():
-
-    def __init__(self, title: str, image, subheader: str, classifier_name: tuple):
-
-        self.title = st.markdown(f"<u><h3><b>{title}</b></h3></u>", unsafe_allow_html=True)
-        self.legend_1 = st.markdown("<legend></legend>", unsafe_allow_html=True)
-        self.image = Image.open(image)
-        st.image(self.image, use_column_width=True)
-        self.subheader = st.subheader(subheader)
-        self.legend_2 = st.markdown("<legend></legend>", unsafe_allow_html=True)
-        self.classifier_name = st.sidebar.selectbox('Select classifier', classifier_name)
-
-# ---------------------------------------------------------Logistic------------------------------------------------------------------
-
-class Logistic(class_diagnostics.ResidualsPlot):
+class DecisionStream(class_diagnostics.ResidualsPlot):
 
     def log_get_diagnostics(self, name):
 
@@ -67,49 +52,29 @@ class Logistic(class_diagnostics.ResidualsPlot):
 
             data = super().plot_quantile_residuals()
 
-        # elif name=='Breush_Pagan_Test':
+        if name=='Cross_Validate_Alphas':
 
-        #     # st.write('Breush_Pagan_Test',Diagnostics.Breush_Pagan_Test(GLM_Bino.GLM_Binomial_fit, train_test.X_test\
-        #     #     ,train_test.Y_test, train_test.X_train, train_test.Y_train, threshold=0.47))
-        #     # #st.pyplot()
-        #     # #data = gca()
+        Decision_tree.Cross_Validate_Alphas(Decision_tree.DT_Classification_fit, train_test1.X_train, train_test1.Y_train, randomstate=42\
+            , ccpalpha=0)
+        st.pyplot()
 
-        # elif name=='Normal_Residual_Test':
+        elif name=='Ideal_Alpha':
 
-        #     # st.write('Normal_Residual_Test',Diagnostics.Normal_Residual_Test(GLM_Bino.GLM_Binomial_fit, train_test.X_test\
-        #     #     ,train_test.Y_test, train_test.X_train, train_test.Y_train, threshold=0.47))
-        #     # Diagnostics.Normal_Residual_Test(GLM_Bino.GLM_Binomial_fit, train_test.X_test\
-        #     #     ,train_test.Y_test, train_test.X_train, train_test.Y_train, threshold=0.47)
-        #     # #st.pyplot()
-        #     # #data = gca()
+            Decision_tree.Ideal_Alpha(Decision_tree.DT_Classification_fit, train_test1.X_train, train_test1.Y_train, threshold_1=0.0019\
+                , threshold_2=0.0021, randomstate=42, ccpalpha=0)
+            st.pyplot()
 
-        # elif name=='Durbin_Watson_Test':
+        elif name=='Confusion_matrix_plot_DT':
 
-        #     # st.write('Durbin_Watson_Test',Diagnostics.Durbin_Watson_Test(GLM_Bino.GLM_Binomial_fit, train_test.X_test\
-        #     #     ,train_test.Y_test, train_test.X_train, train_test.Y_train, threshold=0.47))
-        #     # #st.pyplot()
-        #     # #data = gca()
+            Decision_tree.Confusion_matrix_plot_DT(Decision_tree.DT_Classification_fit, train_test1.X_train, train_test1.Y_train\
+            ,train_test1.X_test, train_test1.Y_test, randomstate=42, ccpalpha=Decision_tree.ideal_ccp_alpha)
+            st.pyplot()
 
-        # elif name=='Partial_Plots':
+        else:
 
-        #     Diagnostics.Partial_Plots(GLM_Bino.GLM_Binomial_fit, train_test.X_test["AGE"],train_test.X_test\
-        #         ,train_test.Y_test, train_test.X_train, train_test.Y_train, threshold=0.47)
-        #     #st.pyplot()
-        #     #data = gca()
-
-        # elif name=='Leverage_Studentized_Quantile_Res':
-
-        #     Diagnostics.Leverage_Studentized_Quantile_Res(GLM_Bino.GLM_Binomial_fit, train_test.X_test\
-        #         ,train_test.Y_test, train_test.X_train, train_test.Y_train, threshold=0.47)
-        #     #st.pyplot()
-        #     #data = gca()
-        
-        # else:
-
-        #     Diagnostics.Cooks_Distance_Quantile_Res(GLM_Bino.GLM_Binomial_fit, train_test.X_test\
-        #         ,train_test.Y_test, train_test.X_train, train_test.Y_train, threshold=0.47)
-        #     #st.pyplot()
-        #     #data = gca()
+            Decision_tree.Plot_DT(Decision_tree.DT_Classification_fit, train_test1.X_train, train_test1.Y_train, randomstate=42\
+                , ccpalpha=Decision_tree.ideal_ccp_alpha)
+            st.pyplot()
 
         return data
 
@@ -157,11 +122,23 @@ class Logistic(class_diagnostics.ResidualsPlot):
         CARDS = st.sidebar.selectbox("CARDS",options=['Cheque_card' ,'no_credit_cards', 'Mastercard_Euroc', 'VISA_mybank'
                                                       ,'VISA_Others','Other_credit_car', 'American_Express']) # dropped cheque card 
 
-        button_clicked = st.sidebar.button('Submit')                                                    
-       
-        if button_clicked:
+        button_clicked = st.sidebar.button('Submit')   
 
-            V, U, G, E, T = 0,0,0,0,0    
+        # Categorical features
+        
+            TITLE = form.cleaned_data.get("TITLE")
+            R,H = 0,0
+            if TITLE == 'H':
+                H=1
+                # list_.append(H)
+            else:
+                R=0
+                # list_.append(H)
+            #input_ = [H]
+            #
+            STATUS = form.cleaned_data.get("STATUS")
+
+            W,V, U, G, E, T = 0,0,0,0,0,0    
 
             if STATUS == 'V':
                 V=1
@@ -174,18 +151,11 @@ class Logistic(class_diagnostics.ResidualsPlot):
             elif STATUS=='T':
                 T=1
             else:
-                V, U, G, E, T = 0,0,0,0,0    
-   
+                W = 0 
 
-            H = 0    
+            PRODUCT = form.cleaned_data.get("PRODUCT") 
 
-            if TITLE=='H':
-                H = 1
-            else:
-                H=0
-            
-            
-            Furniture_Carpet, Dept_Store_Mail, Leisure,Cars, OT = 0,0,0,0,0    
+            Radio_TV_Hifi, Furniture_Carpet, Dept_Store_Mail, Leisure,Cars, OT = 0,0,0,0,0,0    
 
             if PRODUCT=='Furniture_Carpet':
                 Furniture_Carpet=1
@@ -198,19 +168,21 @@ class Logistic(class_diagnostics.ResidualsPlot):
             elif PRODUCT=='OT':
                 OT=1
             else:
-                Furniture_Carpet, Dept_Store_Mail, Leisure,Cars, OT = 0,0,0,0,0    
+                Radio_TV_Hifi = 0   
 
-            
-            Lease = 0    
+            RESID = form.cleaned_data.get("RESID")
+
+            Owner,Lease = 0,0    
 
             if RESID=='Lease':
                 Lease=1    
 
             else:
-                Lease=0
-        
-            
-            German, Turkish, RS, Greek ,Italian, Other_European, Spanish_Portugue = 0,0,0,0,0,0,0    
+                Owner=0
+
+            NAT = form.cleaned_data.get("NAT")
+
+            Yugoslav,German, Turkish, RS, Greek ,Italian, Other_European, Spanish_Portugue = 0,0,0,0,0,0,0,0    
 
             if NAT=='German':
                 German=1
@@ -227,11 +199,12 @@ class Logistic(class_diagnostics.ResidualsPlot):
             elif NAT=='Spanish_Portugue':
                 Spanish_Portugue=1
             else:
-                German, Turkish, RS, Greek ,Italian, Other_European, Spanish_Portugue = 0,0,0,0,0,0,0    
+                Yugoslav = 1 
 
-            
-            Others, Civil_Service_M , Self_employed_pe, Food_Building_Ca, Chemical_Industr\
-            ,Pensioner ,Sea_Vojage_Gast, Military_Service = 0,0,0,0,0,0,0,0    
+            PROF = form.cleaned_data.get("PROF")  
+
+            State_Steel_Ind,Others, Civil_Service_M , Self_employed_pe, Food_Building_Ca, Chemical_Industr\
+            ,Pensioner ,Sea_Vojage_Gast, Military_Service = 0,0,0,0,0,0,0,0,0    
 
             if PROF=='Others':
                 Others=1
@@ -250,22 +223,23 @@ class Logistic(class_diagnostics.ResidualsPlot):
             elif PROF=='Military_Service':
                 Military_Service=1
             else:
-                Others, Civil_Service_M , Self_employed_pe, Food_Building_Ca, Chemical_Industr\
-                ,Pensioner ,Sea_Vojage_Gast, Military_Service = 0,0,0,0,0,0,0,0    
+                State_Steel_Ind = 1 
 
-            
-            Car,Car_and_Motor_bi= 0,0    
+            CAR = form.cleaned_data.get("CAR")   
+
+            Without_Vehicle,Car,Car_and_Motor_bi= 0,0,0    
 
             if CAR=='Car':
                 Car=1
             elif CAR=='Car_and_Motor_bi':
                 Car_and_Motor_bi=1
             else:
-                Car,Car_and_Motor_bi= 0,0    
+                Without_Vehicle= 1    
 
-            
-            no_credit_cards, Mastercard_Euroc, VISA_mybank,VISA_Others\
-            ,Other_credit_car, American_Express = 0,0,0,0,0,0    
+            Cheque_card,no_credit_cards, Mastercard_Euroc, VISA_mybank,VISA_Others\
+            ,Other_credit_car, American_Express = 0,0,0,0,0,0,0  
+
+            CARDS = form.cleaned_data.get("CARDS")  
 
             if CARDS=='no_credit_cards':
                 no_credit_cards=1
@@ -280,43 +254,25 @@ class Logistic(class_diagnostics.ResidualsPlot):
             elif CARDS=='American_Express':
                 American_Express=1
             else:
-                no_credit_cards, Mastercard_Euroc, VISA_mybank,VISA_Others\
-                ,Other_credit_car, American_Express = 0,0,0,0,0,0    
+                Cheque_card = 1  
 
 
+            inputs1 = [H, R, E, G, T, U, V, W, Cars, Dept_Store_Mail, Furniture_Carpet, Leisure, OT, Radio_TV_Hifi, Lease, Owner  
+            , German, Greek, Italian, Other_European, RS, Spanish_Portugue, Turkish, Yugoslav, Chemical_Industr,  Civil_Service_M 
+            , Food_Building_Ca, Military_Service, Others, Pensioner, Sea_Vojage_Gast, Self_employed_pe, State_Steel_Ind  
+            , Car, Car_and_Motor_bi, Without_Vehicle, American_Express, Cheque_card, Mastercard_Euroc, Other_credit_car, VISA_Others  
+            , VISA_mybank, no_credit_cards]
             
-            inputs1 = [H,V, U, G, E, T,Furniture_Carpet, Dept_Store_Mail, Leisure,Cars, OT,Lease,German, Turkish, RS, Greek ,Italian
-                      , Other_European, Spanish_Portugue,Others, Civil_Service_M , Self_employed_pe, Food_Building_Ca, Chemical_Industr
-                      , Pensioner ,Sea_Vojage_Gast, Military_Service,Car,Car_and_Motor_bi,no_credit_cards, Mastercard_Euroc, VISA_mybank
-                      ,VISA_Others, Other_credit_car, American_Express]
-            
-            inputs2 = [CHILDREN, PERS_H, AGE, TMADD, TMJOB1, TEL, NMBLOAN, FINLOAN, INCOME, EC_CARD, INC, INC1, BUREAU, LOCATION, LOANS
-                      , REGN, DIV, CASH]    
+            inputs2 = [CHILDREN, PERS_H, AGE, TMADD, TMJOB1, TEL, NMBLOAN, FINLOAN, INCOME, EC_CARD, INC, INC1, BUREAU, LOCATION, LOANS\
+            , REGN, DIV, CASH]    
 
             list_ = inputs2 + inputs1
 
-            inputs = pd.Series(list_)  
-            
-            prediction = Model_Perf.Prediction(GLM_Bino.GLM_Binomial_fit,inputs, train_test.X_train, train_test.Y_train)    
+            inputs = np.array([list_]).reshape(1,-1)           
+            answer = d.dt_pruned_tree(0, inputs, x_test, y_test, ccpalpha, threshold_1, threshold_2)[2]
 
             st.subheader('Customer {} probability of default is: {}'.format(NAME , prediction))
-            st.success('Successfully executed the model')
-            
-
-# -----------------------------------------------------------Decision--------------------------------------------------------------
-
-# class Decision(BaseStreamlit):
-
-#   def __init__(self):
-
-
-#   def get_decision_fea(self):
-
-
-#   def dec_get_visualisations(self):
-
-
-#   def dec_get_prediction(self):
+            st.success('Successfully executed the model')  
 
 # ------------------------------------------------------main function (entry point) ------------------------------------------------------
 

@@ -48,12 +48,15 @@ class QuantileResiduals(ModelPerfomance):
         residuals = []
 
         try:
+
             if not isinstance(self.x_test, np.ndarray):
+
                 raise TypeError("must be an instance of a numpy-ndarray")
             
             self.predict_probability = super().probability_prediction()
 
             if self.y_test.shape[0] is None:
+
                 raise IndexError ("index empty")
 
             for i in range(self.y_test.shape[0]):
@@ -71,6 +74,7 @@ class QuantileResiduals(ModelPerfomance):
                         residuals.append(norm.ppf(u_2))
 
                 elif (self.threshold < 0 or self.threshold > 1):
+
                     raise ValueError("threshold outside bounds: [0-1]")
 
             quantile_residuals_series = pd.Series(residuals).round(2)
@@ -78,6 +82,7 @@ class QuantileResiduals(ModelPerfomance):
             return quantile_residuals_series
 
         except (TypeError, ValueError, IndexError) as e:
+
             print("Error:", e)
 
             return None
@@ -93,9 +98,11 @@ class ResidualsPlot(QuantileResiduals):
         self.fig, self.axs = plt.subplots(1,1)
 
         try:
+
             quantile_residuals_series = super().quantile_residuals()
 
             if quantile_residuals_series is None:
+
                 raise ValueError ("residuals empty")
 
             self.axs.plot(quantile_residuals_series.index, quantile_residuals_series.values)
@@ -104,6 +111,7 @@ class ResidualsPlot(QuantileResiduals):
             return self.fig
         
         except ValueError as v:
+
             print("Error:", v)
 
             return None
@@ -129,6 +137,7 @@ class BreushPaganTest(QuantileResiduals):
             return self.test
         
         except ValueError as v:
+
             print("Error:", v)
 
             return None
@@ -136,12 +145,6 @@ class BreushPaganTest(QuantileResiduals):
 # ------------------------------------------------------Normality Test-----------------------------------------------
 
 class NormalityTest(QuantileResiduals):
-
-    # def __init__(self, func, x_test, y_test, x_train, y_train, threshold,custom_rcParams: dict) -> None:
-
-    #     super().__init__(func, x_test, y_test, x_train, y_train, threshold)
-    #     self.custom_rcParams = plt.rcParams.update(custom_rcParams)
-    #     self.fig, self.axs = plt.subplots(1,1)
 
     def normality_test_quantile(self):
 
@@ -152,13 +155,11 @@ class NormalityTest(QuantileResiduals):
 
         return self.normal_test
 
-
     def plot_normality_quantile(self):
 
        """ normality plot"""
 
        self.fig, self.axs = plt.subplots(1,1)
-
        quantile_residuals_series = super().quantile_residuals()
        self.qqplot = stats.probplot(quantile_residuals_series, dist="norm")
        self.axs.plot(self.qqplot[0][0],self.qqplot[0][1], marker='o', linestyle='none')
@@ -183,19 +184,11 @@ class DurbinWatsonTest(QuantileResiduals):
 
 class PartialPlots(QuantileResiduals):
 
-    # def __init__(self, func, x_test, y_test, x_train, y_train, threshold,custom_rcParams: dict) -> None:
-
-    #     super().__init__(func, x_test, y_test, x_train, y_train, threshold)
-    #     self.custom_rcParams = plt.rcParams.update(custom_rcParams)
-    #     self.fig, self.axs = plt.subplots(1,1)
-
-
     def partial_plots_quantile(self, ind_var):
 
        """ Partial Plots - Residuals vs Features """
 
        self.fig, self.axs = plt.subplots(1,1)
-
        quantile_residuals_series = super().quantile_residuals()
        self.xlabel_name = ind_var.name
        self.axs.scatter(ind_var, quantile_residuals_series)
@@ -205,22 +198,13 @@ class PartialPlots(QuantileResiduals):
 
 # -------------------------------------------------Leverage Studentised Residuals-----------------------------------------
 
-
 class LevStudQuaRes(QuantileResiduals):
-
-    # def __init__(self, func, x_test, y_test, x_train, y_train, threshold,custom_rcParams: dict) -> None:
-
-    #     super().__init__(func, x_test, y_test, x_train, y_train, threshold)
-    #     self.custom_rcParams = plt.rcParams.update(custom_rcParams)
-    #     self.fig, self.axs = plt.subplots(1,1)
-
 
     def plot_lev_stud_quantile(self):
 
        """ Outliers and Influence """
 
        self.fig, self.axs = plt.subplots(1,1)
-
        res = self.function(self.x_train, self.y_train)[1]
        quantile_residuals_series = super().quantile_residuals()
        hat_matrix = np.round(res.get_hat_matrix_diag(),2)
@@ -239,19 +223,11 @@ class LevStudQuaRes(QuantileResiduals):
 
 class CooksDisQuantRes(QuantileResiduals):
 
-    # def __init__(self, func, x_test, y_test, x_train, y_train, threshold,custom_rcParams: dict) -> None:
-
-    #     super().__init__(func, x_test, y_test, x_train, y_train, threshold)
-    #     self.custom_rcParams = plt.rcParams.update(custom_rcParams)
-    #     self.fig, self.axs = plt.subplots(1,1)
-
-
     def plot_cooks_dis_quantile(self):
 
         """ Cooks Distance Plot """
 
         self.fig, self.axs = plt.subplots(1,1)
-
         res = self.function(self.x_train, self.y_train)[1]
         quantile_residuals_series = super().quantile_residuals()
         hat_matrix = np.round(res.get_hat_matrix_diag(),2)
@@ -283,7 +259,7 @@ if __name__ == "__main__":
 
     custom_rcParams = {"figure.figsize": (8, 6), "axes.labelsize": 12}
 
-    instance = OneHotEncoding(custom_rcParams, imputer_cat, True)
+    instance = OneHotEncoding(custom_rcParams, imputer_cat, "statistics")
     #instance.sample_imbalance(df_loan_float, df_loan_float["GB"])
     
     x_train = instance.split_xtrain_ytrain(df_loan_float, target=df_loan_float["GB"])[0]

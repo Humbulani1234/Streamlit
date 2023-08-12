@@ -27,7 +27,6 @@ class ImputationCat:
 
         self.df_cat = df_cat
 
-
     def simple_imputer_mode(self):
 
         """ Simple Imputation -- through Python API's """
@@ -38,7 +37,6 @@ class ImputationCat:
 
         return df_cat_mode
 
-
     def KNN_Imputation(self):
 
         """ KNN imputation """
@@ -47,7 +45,6 @@ class ImputationCat:
         dataframe_impute_KNN = impy.fast_knn(dataframe_array)
 
         return pd.DataFrame(dataframe_impute_KNN)  
-
 
     def _ordinal_encode_nan(self, independent_series, dataframe): # for one column, then procedural
         
@@ -65,7 +62,6 @@ class ImputationCat:
         
         return dataframe
 
-
     def concatenate_total_df(self, dataframefloat, dataframecategorical):
 
         """ oncatenate the imputed dataframes(categorical/float)
@@ -74,24 +70,14 @@ class ImputationCat:
         df_total_no_missing = pd.concat([dataframefloat, dataframecategorical], axis = 1)
 
         return df_total_no_missing
-
     
 # -----------------------------------------------------------Testing-----------------------------------------------------------
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
     
-#     file_path = "./KGB.sas7bdat"
-#     data_types, df_loan_categorical, df_loan_float = data_cleaning(file_path)
-#     miss = ImputationCat(df_loan_categorical)
-#     #miss.concatenate_total_df(dataframefloat, dataframecategorical) 
-#     y = miss.simple_imputer_mode()
-#     #print(y)
-#     l = []
-#     for col in y.columns:
-#         if col == "STATUS":
-#             #l.append(col)
-#             y = pd.get_dummies(y[col])
-#             print(y)
-#         else:
-#             pass
- 
+    file_path = "./KGB.sas7bdat"
+    data_types, df_loan_categorical, df_loan_float = data_cleaning(file_path)
+    miss = ImputationCat(df_loan_categorical)
+    #miss.concatenate_total_df(dataframefloat, dataframecategorical) 
+    y = miss.simple_imputer_mode()
+    #print(y)
