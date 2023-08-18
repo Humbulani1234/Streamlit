@@ -5,7 +5,6 @@ import matplotlib.pyplot as plt
 import warnings
 import pandas as pd
 from PIL import Image
-#import clustering
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from scipy.stats import norm
 import pylab
@@ -15,27 +14,27 @@ import statsmodels.api as sm
 import scipy
 from scipy import stats
 from math import *
+import pickle
+
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.tree import plot_tree
 from sklearn.model_selection import cross_validate
 from sklearn.model_selection import cross_val_score
-#import Decision_tree
-
 
 from class_traintest import OneHotEncoding
 from class_base import Base
 from pd_download import data_cleaning
 from class_missing_values import ImputationCat
-import class_diagnostics
+from class_diagnostics import (ResidualsPlot, BreushPaganTest, NormalityTest, DurbinWatsonTest,
+                               PartialPlots, LevStudQuaRes, CooksDisQuantRes)
+from class_modelperf import ModelPerfomance
+from class_decision_stream import DecisionStream
+import data_stream
+from class_decision_tree import DecisionTree
 
-# ---------------------------------------------global options ---------------------------------------------------------------
+# ---------------------------------------------Settings ---------------------------------------------------------------
  
-st.set_option('deprecation.showPyplotGlobalUse', False)
-pd.set_option("display.width", 3000)
-pd.set_option("display.max_columns", 3000)
-pd.set_option("display.max_rows", 3000)
-pd.set_option("display.float_format", lambda x: "%.0f" %x)
-warnings.filterwarnings("ignore")
+data_stream.settings()
 
 # -------------------------------------------------------------------BaseClass--------------------------------------------------------
 
@@ -43,17 +42,25 @@ class BaseStreamlit():
 
     def __init__(self, title: str, image, subheader: str, classifier_name: tuple):
 
-        self.title = st.markdown(f"<u><h3><b>{title}</b></h3></u>", unsafe_allow_html=True)
+        title = """ <div style="border: 2px solid black; padding:10px; box-shadow:5px 5px 10px grey;">
+
+                    Probability of Default Prediction
+                """
+
+        self.title = st.markdown(title, unsafe_allow_html=True)
         self.legend_1 = st.markdown("<legend></legend>", unsafe_allow_html=True)
         self.image = Image.open(image)
         st.image(self.image, use_column_width=True)
-        self.subheader = st.subheader(subheader)
+        self.subheader = st.markdown(f"<u><h3><b>{subheader}<b><h3><u>", unsafe_allow_html=True)
+        self.legend_2 = st.markdown("<legend></legend>", unsafe_allow_html=True)
         self.legend_2 = st.markdown("<legend></legend>", unsafe_allow_html=True)
         self.classifier_name = st.sidebar.selectbox('Select classifier', classifier_name)
+        self.dataset_name = st.sidebar.selectbox('Select dataset', ('Logistic_KGB', 'Decision_KGB'))
 
 # ---------------------------------------------------------Logistic------------------------------------------------------------------
 
-class Logistic(class_diagnostics.ResidualsPlot):
+class Logistic(ResidualsPlot, BreushPaganTest, NormalityTest, DurbinWatsonTest,
+               PartialPlots, LevStudQuaRes, CooksDisQuantRes, ModelPerfomance):
 
     def log_get_diagnostics(self, name):
 
@@ -61,55 +68,53 @@ class Logistic(class_diagnostics.ResidualsPlot):
 
         if name=='Quantile Res':
 
-            # st.write('Quantile Residuals',Diagnostics.Quantile_Residuals(GLM_Bino.GLM_Binomial_fit, train_test.X_test
-            #                                                              ,train_test.Y_test, train_test.X_train, train_test.Y_train, 
-            #                                                               threshold=0.47))
-
+            st.write('Quantile Residuals',super().normality_test_quantile())
             data = super().plot_quantile_residuals()
 
-        # elif name=='Breush_Pagan_Test':
+        elif name=='Breush_Pagan_Test':
 
-        #     # st.write('Breush_Pagan_Test',Diagnostics.Breush_Pagan_Test(GLM_Bino.GLM_Binomial_fit, train_test.X_test\
-        #     #     ,train_test.Y_test, train_test.X_train, train_test.Y_train, threshold=0.47))
-        #     # #st.pyplot()
-        #     # #data = gca()
+            st.write('Breush_Pagan_Test',super().breush_pagan_quantile())
+            data = super().breush_pagan_quantile()
 
-        # elif name=='Normal_Residual_Test':
+        elif name=='Normal_Residual_Test':
 
-        #     # st.write('Normal_Residual_Test',Diagnostics.Normal_Residual_Test(GLM_Bino.GLM_Binomial_fit, train_test.X_test\
-        #     #     ,train_test.Y_test, train_test.X_train, train_test.Y_train, threshold=0.47))
-        #     # Diagnostics.Normal_Residual_Test(GLM_Bino.GLM_Binomial_fit, train_test.X_test\
-        #     #     ,train_test.Y_test, train_test.X_train, train_test.Y_train, threshold=0.47)
-        #     # #st.pyplot()
-        #     # #data = gca()
+            st.write('Normal_Residual_Test',super().normality_test_quantile)
+            data = super().plot_normality_quantile()
 
-        # elif name=='Durbin_Watson_Test':
+        elif name=='Durbin_Watson_Test':
 
-        #     # st.write('Durbin_Watson_Test',Diagnostics.Durbin_Watson_Test(GLM_Bino.GLM_Binomial_fit, train_test.X_test\
-        #     #     ,train_test.Y_test, train_test.X_train, train_test.Y_train, threshold=0.47))
-        #     # #st.pyplot()
-        #     # #data = gca()
+            st.write('Durbin_Watson_Test',super().durbin_watson_quantile)        
+            data = super().plot_quantile_residuals()
 
-        # elif name=='Partial_Plots':
+        elif name=='Partial_Plots':
 
-        #     Diagnostics.Partial_Plots(GLM_Bino.GLM_Binomial_fit, train_test.X_test["AGE"],train_test.X_test\
-        #         ,train_test.Y_test, train_test.X_train, train_test.Y_train, threshold=0.47)
-        #     #st.pyplot()
-        #     #data = gca()
+            data = super().partial_plots_quantile()
 
-        # elif name=='Leverage_Studentized_Quantile_Res':
+        elif name=='Leverage_Studentized_Quantile_Res':
 
-        #     Diagnostics.Leverage_Studentized_Quantile_Res(GLM_Bino.GLM_Binomial_fit, train_test.X_test\
-        #         ,train_test.Y_test, train_test.X_train, train_test.Y_train, threshold=0.47)
-        #     #st.pyplot()
-        #     #data = gca()
+            data = super().plot_lev_stud_quantile()
         
-        # else:
+        else:
 
-        #     Diagnostics.Cooks_Distance_Quantile_Res(GLM_Bino.GLM_Binomial_fit, train_test.X_test\
-        #         ,train_test.Y_test, train_test.X_train, train_test.Y_train, threshold=0.47)
-        #     #st.pyplot()
-        #     #data = gca()
+            data = super().plot_cooks_dis_quantile()
+
+        return data
+
+    def log_get_perfomance(self, name):
+
+        data = None
+
+        if name=='ROC Curve':
+
+            data = super().roc_curve_analytics()
+
+        elif name=='Confusion Matrix':
+
+            data = super().confusion_matrix_plot()
+        
+        else:
+
+            data = super().plot_quantile_residuals()
 
         return data
 
@@ -284,67 +289,53 @@ class Logistic(class_diagnostics.ResidualsPlot):
                 ,Other_credit_car, American_Express = 0,0,0,0,0,0    
 
             inputs1 = [H, E, G, T, U, V, Cars, Dept_Store_Mail, Furniture_Carpet, Leisure, OT, Lease, German, Greek, 
-            Italian, Other_European, RS, Spanish_Portugue, Turkish, Chemical_Industr, Civil_Service_M, 
-            Food_Building_Ca, Military_Service, Others, Pensioner, Sea_Vojage_Gast, Self_employed_pe, Car, 
-            Car_and_Motor_bi, American_Express, Cheque_card, Mastercard_Euroc, Other_credit_car, VISA_Others, VISA_mybank]
+                      Italian, Other_European, RS, Spanish_Portugue, Turkish, Chemical_Industr, Civil_Service_M, 
+                      Food_Building_Ca, Military_Service, Others, Pensioner, Sea_Vojage_Gast, Self_employed_pe, Car, 
+                      Car_and_Motor_bi, American_Express, Cheque_card, Mastercard_Euroc, Other_credit_car, VISA_Others, VISA_mybank]
             
-            inputs2 = [CHILDREN, PERS_H, AGE, TMADD, TMJOB1, TEL, NMBLOAN, FINLOAN, INCOME, EC_CARD, INC, INC1, BUREAU, LOCATION, LOANS
-                      , REGN, DIV, CASH]    
+            inputs2 = [CHILDREN, PERS_H, AGE, TMADD, TMJOB1, TEL, NMBLOAN, FINLOAN, INCOME, EC_CARD, INC, INC1, BUREAU
+                      ,LOCATION, LOANS, REGN, DIV, CASH]    
 
             list_ = inputs2 + inputs1
-
-            inputs = pd.Series(list_)  
-            
-            prediction = Model_Perf.Prediction(GLM_Bino.GLM_Binomial_fit,inputs, train_test.X_train, train_test.Y_train)    
+            inputs = np.array(list_).reshape(1,-1)
+            answer = np.array(data.loaded_model.predict(inputs.reshape(1,-1))) 
 
             st.subheader('Customer {} probability of default is: {}'.format(NAME , prediction))
             st.success('Successfully executed the model')
             
 # ------------------------------------------------------main function (entry point) ------------------------------------------------------
 
-def main(custom_rcParams, x_test, y_test, threshold):
+def main(custom_rcParams, x_test, y_test, df_nomiss_cat, type_,
+         df_loan_float, target, threshold, randomstate):
 
-    # class_diagnostics.ResidualsPlot(custom_rcParams, x_test, y_test, threshold)
-    basestreamlit = BaseStreamlit("humbu",'pngegg.png', "humbu", ('Logistic', 'Decision'))
+    basestreamlit = BaseStreamlit("Probabilty of Default Prediction",'data.png'
+                                  ,"Various Perfomance Plots", ('Logistic', 'Decision'))
     logistic = Logistic(custom_rcParams, x_test, y_test, threshold)
-    #decision = Decision()
-    
-    #basestreamlit.title
-    # basestreamlit.image
-    # basestreamlit.subheader
+    decision = DecisionStream(custom_rcParams, df_nomiss_cat, "machine", y_test,
+                             df_loan_float, df_loan_float["GB"], threshold, randomstate)
     classifier_name = basestreamlit.classifier_name
 
 
     if classifier_name=='Logistic':
 
-        # dataset_name = st.sidebar.selectbox('Select dataset', ('Logistic_KGB', 'Decision_KGB','Cluster'),key=29)
-        # visualization_name=st.sidebar.selectbox('Select Visuals', ('confusion','Cross_tab','Pivot','Clustering','ROC'\
-        # ,'confusion_matrix'), key=31)
-        diagnostics_name=st.sidebar.selectbox('Select Diagnostic', ('Quantile Res','Breush_Pagan_Test','Normal_Residual_Test'\
-        ,'Durbin_Watson_Test','Partial_Plots','Leverage_Studentized_Quantile_Res','Cooks_Distance_Quantile_Res'))
-        # get_dataset(dataset_name)
+        dataset_name = st.sidebar.selectbox('Select dataset', ('Logistic_KGB', 'Decision_KGB'), key=1)
+        # logistic.get_datasets(dataset_name)
+        diagnostics_name=st.sidebar.selectbox('Select Diagnostic', ('Quantile Res','Breush_Pagan_Test','Normal_Residual_Test',
+                                              'Durbin_Watson_Test','Partial_Plots','Leverage_Studentized_Quantile_Res',
+                                              'Cooks_Distance_Quantile_Res'))
         figure = logistic.log_get_diagnostics(diagnostics_name)
-        #print(type(figure))
         st.pyplot(figure)
-        # get_data(visualization_name)
-        #button_clicked = logistic.button_clicked
         logistic.log_get_prediction()
 
+    else:
+
+        diagnostics_name=st.sidebar.selectbox('Select Graphs', ('Cross Validation Alpha', 'Confusion Matrix', 'Tree Plot'))
+        figure = decision.dec_get_perfomance(diagnostics_name, data_stream.ccpalpha)
+        st.pyplot(figure)
+        decision.dec_get_prediction()
+
+main(data_stream.custom_rcParams, data_stream.x_test, data_stream.y_test, data_stream.imputer_cat,
+     "machine", data_stream.df_loan_float, data_stream.df_loan_float["GB"], data_stream.threshold,
+      data_stream.randomstate)
+
 # -----------------------------------------------------------------Testing---------------------------------------------------------
- 
-if __name__ == "__main__":
-
-    file_path = "KGB.sas7bdat"
-    data_types, df_loan_categorical, df_loan_float = data_cleaning(file_path)    
-    miss = ImputationCat(df_loan_categorical)
-    imputer_cat = miss.simple_imputer_mode()
-
-    custom_rcParams = {"figure.figsize": (8, 6), "axes.labelsize": 12}
-
-    instance = OneHotEncoding(custom_rcParams, imputer_cat, True)
-    x_test = instance.split_xtrain_ytrain(df_loan_float, target=df_loan_float["GB"])[1]
-    x_test = sm.add_constant(x_test.values)
-    y_test = instance.split_xtrain_ytrain(df_loan_float, target=df_loan_float["GB"])[3]
-    threshold = 0.47
-
-    main(custom_rcParams , x_test, y_test, threshold)

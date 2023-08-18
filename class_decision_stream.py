@@ -4,81 +4,49 @@ import matplotlib.pyplot as plt
 import warnings
 import pandas as pd
 from PIL import Image
-#import clustering
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
-from scipy.stats import norm
-import pylab
-import statsmodels.stats.diagnostic as sd
-from statsmodels.stats.stattools import durbin_watson
-import statsmodels.api as sm
-import scipy
-from scipy import stats
 from math import *
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.tree import plot_tree
 from sklearn.model_selection import cross_validate
 from sklearn.model_selection import cross_val_score
-#import Decision_tree
-
 
 from class_traintest import OneHotEncoding
 from class_base import Base
 from pd_download import data_cleaning
 from class_missing_values import ImputationCat
-import class_diagnostics
-
-# ---------------------------------------------global options ---------------------------------------------------------------
+from class_decision_tree import DecisionTree
  
-st.set_option('deprecation.showPyplotGlobalUse', False)
-pd.set_option("display.width", 3000)
-pd.set_option("display.max_columns", 3000)
-pd.set_option("display.max_rows", 3000)
-pd.set_option("display.float_format", lambda x: "%.0f" %x)
-warnings.filterwarnings("ignore")
+# rom data_stream import settings
+
+# ---------------------------------------------Settings ---------------------------------------------------------------
+ 
+# settings()
 
 # ---------------------------------------------------------------DecisionStream--------------------------------------------------
 
-class DecisionStream(class_diagnostics.ResidualsPlot):
+class DecisionStream(DecisionTree):
 
-    def log_get_diagnostics(self, name):
+    def dec_get_perfomance(self, name, ccpalpha):
 
         data = None
 
-        if name=='Quantile Res':
+        if name=='Cross Validation Alpha':
 
-            # st.write('Quantile Residuals',Diagnostics.Quantile_Residuals(GLM_Bino.GLM_Binomial_fit, train_test.X_test
-            #                                                              ,train_test.Y_test, train_test.X_train, train_test.Y_train, 
-            #                                                               threshold=0.47))
+            data = super().cross_validate_alphas(ccpalpha)[1]
 
-            data = super().plot_quantile_residuals()
-
-        if name=='Cross_Validate_Alphas':
-
-        Decision_tree.Cross_Validate_Alphas(Decision_tree.DT_Classification_fit, train_test1.X_train, train_test1.Y_train, randomstate=42\
-            , ccpalpha=0)
-        st.pyplot()
-
-        elif name=='Ideal_Alpha':
-
-            Decision_tree.Ideal_Alpha(Decision_tree.DT_Classification_fit, train_test1.X_train, train_test1.Y_train, threshold_1=0.0019\
-                , threshold_2=0.0021, randomstate=42, ccpalpha=0)
-            st.pyplot()
 
         elif name=='Confusion_matrix_plot_DT':
 
-            Decision_tree.Confusion_matrix_plot_DT(Decision_tree.DT_Classification_fit, train_test1.X_train, train_test1.Y_train\
-            ,train_test1.X_test, train_test1.Y_test, randomstate=42, ccpalpha=Decision_tree.ideal_ccp_alpha)
-            st.pyplot()
+            data = super().dt_pruned_tree()[3]
 
         else:
 
-            Decision_tree.Plot_DT(Decision_tree.DT_Classification_fit, train_test1.X_train, train_test1.Y_train, randomstate=42\
-                , ccpalpha=Decision_tree.ideal_ccp_alpha)
-            st.pyplot()
+            data = super().dt_pruned_tree()[4]
 
         return data
 
-    def log_get_prediction(self):  
+    def dec_get_prediction(self):  
 
         NAME = st.sidebar.text_input("CUSTOMER NAME")
         AGE = st.sidebar.slider("AGE", 0,100)
@@ -122,9 +90,9 @@ class DecisionStream(class_diagnostics.ResidualsPlot):
         CARDS = st.sidebar.selectbox("CARDS",options=['Cheque_card' ,'no_credit_cards', 'Mastercard_Euroc', 'VISA_mybank'
                                                       ,'VISA_Others','Other_credit_car', 'American_Express']) # dropped cheque card 
 
-        button_clicked = st.sidebar.button('Submit')   
+        button_clicked = st.sidebar.button('Submit')
 
-        # Categorical features
+        if button_clicked:   
         
             TITLE = form.cleaned_data.get("TITLE")
             R,H = 0,0
@@ -276,49 +244,20 @@ class DecisionStream(class_diagnostics.ResidualsPlot):
 
 # ------------------------------------------------------main function (entry point) ------------------------------------------------------
 
-def main(custom_rcParams, x_test, y_test, threshold):
+# def main(custom_rcParams, x_test, y_test, threshold):
 
-    # class_diagnostics.ResidualsPlot(custom_rcParams, x_test, y_test, threshold)
-    basestreamlit = BaseStreamlit("humbu",'pngegg.png', "humbu", ('Logistic', 'Decision'))
-    logistic = Logistic(custom_rcParams, x_test, y_test, threshold)
-    #decision = Decision()
-    
-    #basestreamlit.title
-    # basestreamlit.image
-    # basestreamlit.subheader
-    classifier_name = basestreamlit.classifier_name
+#     decsion = Decsion(custom_rcParams, x_test, y_test, threshold)
+#     classifier_name = basestreamlit.classifier_name
 
 
-    if classifier_name=='Logistic':
+#     if classifier_name=='Decision':
 
-        # dataset_name = st.sidebar.selectbox('Select dataset', ('Logistic_KGB', 'Decision_KGB','Cluster'),key=29)
-        # visualization_name=st.sidebar.selectbox('Select Visuals', ('confusion','Cross_tab','Pivot','Clustering','ROC'\
-        # ,'confusion_matrix'), key=31)
-        diagnostics_name=st.sidebar.selectbox('Select Diagnostic', ('Quantile Res','Breush_Pagan_Test','Normal_Residual_Test'\
-        ,'Durbin_Watson_Test','Partial_Plots','Leverage_Studentized_Quantile_Res','Cooks_Distance_Quantile_Res'))
-        # get_dataset(dataset_name)
-        figure = logistic.log_get_diagnostics(diagnostics_name)
-        #print(type(figure))
-        st.pyplot(figure)
-        # get_data(visualization_name)
-        #button_clicked = logistic.button_clicked
-        logistic.log_get_prediction()
+#         diagnostics_name=st.sidebar.selectbox('Select Graphs', ('Cross Validation Alpha', 'Confusion Matrix', 'Tree Plot'))
+#         figure = logistic.dec_get_perfomance(diagnostics_name)
+#         st.pyplot(figure)
+#         logistic.dec_get_prediction()
+
+# main(custom_rcParams , x_test, y_test, threshold)
 
 # -----------------------------------------------------------------Testing---------------------------------------------------------
  
-if __name__ == "__main__":
-
-    file_path = "KGB.sas7bdat"
-    data_types, df_loan_categorical, df_loan_float = data_cleaning(file_path)    
-    miss = ImputationCat(df_loan_categorical)
-    imputer_cat = miss.simple_imputer_mode()
-
-    custom_rcParams = {"figure.figsize": (8, 6), "axes.labelsize": 12}
-
-    instance = OneHotEncoding(custom_rcParams, imputer_cat, True)
-    x_test = instance.split_xtrain_ytrain(df_loan_float, target=df_loan_float["GB"])[1]
-    x_test = sm.add_constant(x_test.values)
-    y_test = instance.split_xtrain_ytrain(df_loan_float, target=df_loan_float["GB"])[3]
-    threshold = 0.47
-
-    main(custom_rcParams , x_test, y_test, threshold)
