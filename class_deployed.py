@@ -15,6 +15,7 @@ import scipy
 from scipy import stats
 from math import *
 import pickle
+import statsmodels.stats.diagnostic as sd
 
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.tree import plot_tree
@@ -43,13 +44,15 @@ class BaseStreamlit():
     def __init__(self, title: str, image, subheader: str, classifier_name: tuple):
 
         title = """ <div style="border: 2px solid black; padding:5px; box-shadow:3px 3px 7px grey
-                        text-align:center; font-family:Arial,sans-serif;font-weight:bold;">
+                        display:flex; align-items:center; justify-content:center; text-align:center;
+                        font-family:Arial,sans-serif;font-weight:bold; font-size:24px;">
 
                     Probability of Default Prediction
                 """
 
         subheader = """ <div style="border: 2px solid black; padding:5px; box-shadow:3px 3px 7px grey
-                        text-align:center; font-family:Arial,sans-serif;font-weight:bold;">
+                        display:flex; align-items:center; justify-content:center; text-align:center;
+                        font-family:Arial,sans-serif;font-weight:bold; font-size:24px;">
 
                     Various Perfomance Plots
                 """
@@ -80,8 +83,8 @@ class Logistic(ResidualsPlot, BreushPaganTest, NormalityTest, DurbinWatsonTest,
 
         elif name=='Breush_Pagan_Test':
 
-            st.write('Breush_Pagan_Test',super().breush_pagan_quantile())
-            data = super().breush_pagan_quantile()
+            data = st.write('Breush_Pagan_Test',super().breush_pagan_quantile())
+            # data = super().breush_pagan_quantile()
 
         elif name=='Normal_Residual_Test':
 

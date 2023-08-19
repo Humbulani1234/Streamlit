@@ -31,6 +31,7 @@ from scipy.stats import probplot, normaltest
 from math import sqrt
 import statsmodels.api as sm
 import pickle
+import statsmodels.stats.diagnostic as sd
 
 from class_modelperf import ModelPerfomance
 from class_traintest import OneHotEncoding
