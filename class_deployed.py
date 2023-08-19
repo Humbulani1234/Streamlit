@@ -42,16 +42,23 @@ class BaseStreamlit():
 
     def __init__(self, title: str, image, subheader: str, classifier_name: tuple):
 
-        title = """ <div style="border: 2px solid black; padding:10px; box-shadow:5px 5px 10px grey;">
+        title = """ <div style="border: 2px solid black; padding:5px; box-shadow:3px 3px 7px grey
+                        text-align:center; font-family:Arial,sans-serif;font-weight:bold;">
 
                     Probability of Default Prediction
+                """
+
+        subheader = """ <div style="border: 2px solid black; padding:5px; box-shadow:3px 3px 7px grey
+                        text-align:center; font-family:Arial,sans-serif;font-weight:bold;">
+
+                    Various Perfomance Plots
                 """
 
         self.title = st.markdown(title, unsafe_allow_html=True)
         self.legend_1 = st.markdown("<legend></legend>", unsafe_allow_html=True)
         self.image = Image.open(image)
         st.image(self.image, use_column_width=True)
-        self.subheader = st.markdown(f"<u><h3><b>{subheader}<b><h3><u>", unsafe_allow_html=True)
+        self.subheader = st.markdown(subheader, unsafe_allow_html=True)
         self.legend_2 = st.markdown("<legend></legend>", unsafe_allow_html=True)
         self.legend_2 = st.markdown("<legend></legend>", unsafe_allow_html=True)
         self.classifier_name = st.sidebar.selectbox('Select classifier', classifier_name)
