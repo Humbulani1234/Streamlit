@@ -35,6 +35,8 @@ custom_rcParams = {"figure.figsize": (8, 6), "axes.labelsize": 12}
 
 instance = OneHotEncoding(custom_rcParams, imputer_cat, "statistics")
 x_test = instance.split_xtrain_ytrain(df_loan_float, target=df_loan_float["GB"])[1]
+x_train = instance.split_xtrain_ytrain(df_loan_float, target=df_loan_float["GB"])[0]
+ind_var = x_test["CHILDREN"]
 x_test = sm.add_constant(x_test.values)
 y_test = instance.split_xtrain_ytrain(df_loan_float, target=df_loan_float["GB"])[3]
 threshold = 0.47

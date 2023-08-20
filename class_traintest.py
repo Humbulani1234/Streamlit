@@ -27,15 +27,6 @@ from class_base import Base
 from pd_download import data_cleaning
 from class_missing_values import ImputationCat
 
-# ------------------------------------------------------Settings---------------------------------------------------------------
-
-pd.set_option("display.width", 1100)
-pd.set_option("display.max_columns", 1000)
-pd.set_option("display.max_rows", 1000)
-pd.set_option("display.float_format", lambda x: "%.0f" %x)
-warnings.filterwarnings("ignore")
-
-# -----------------------------------------------------Class OneHotEncoding-----------------------------------------------------
 
 class OneHotEncoding(Base):
 
@@ -116,27 +107,3 @@ class OneHotEncoding(Base):
         x_test_pd = x_test_pd.drop(labels=["_freq_"], axis=1) # temp
    
         return x_train_pd, x_test_pd, y_train_pd, y_test_pd
-
-# ---------------------------------------------------------Testing-------------------------------------------------------
-
-if __name__ == "__main__":
-
-    file_path = "./KGB.sas7bdat"
-    data_types, df_loan_categorical, df_loan_float = data_cleaning(file_path)
-    #print(df_loan_float)    
-    miss = ImputationCat(df_cat=df_loan_categorical)
-    imputer_cat = miss.simple_imputer_mode()
-    #print(imputer_cat)
-    to_view = miss.concatenate_total_df(df_loan_float, imputer_cat)
-
-    #print(to_use)
-
-    custom_rcParams = {"figure.figsize": (8, 6), "axes.labelsize": 12}
-
-    instance = OneHotEncoding(custom_rcParams, imputer_cat, "machine")
-    # print(instance.df_cat)
-    c = instance.onehot_encoding()
-    #print(c)
-    #si = instance.sample_imbalance(df_loan_float, df_loan_float["GB"])
-    #plt.show()
-

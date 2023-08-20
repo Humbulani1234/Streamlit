@@ -161,34 +161,3 @@ class DecisionTree(OneHotEncoding):
         pruned_plot_tree = self.plot_dt(ideal_ccp_alpha)
 
         return ideal_ccp_alpha, pruned_clf_dt, pruned_predict_dt, pruned_confusion_matrix, pruned_plot_tree  
-
-# --------------------------------------------------------Testing--------------------------------------------------------------------------------
-
-if __name__ == "__main__":
-
-    file_path = "static/KGB.sas7bdat"
-    data_types, df_loan_categorical, df_loan_float = data_cleaning(file_path)    
-    miss = ImputationCat(df_cat=df_loan_categorical)
-    imputer_cat = miss.simple_imputer_mode()
-    to_view = miss.concatenate_total_df(df_loan_float, imputer_cat)
-
-    custom_rcParams = {"figure.figsize": (8, 6), "axes.labelsize": 12}
-
-    instance = OneHotEncoding(custom_rcParams, imputer_cat, "machine")
-
-    x_train = instance.split_xtrain_ytrain(df_loan_float, target=df_loan_float["GB"])[0]
-    y_train = instance.split_xtrain_ytrain(df_loan_float, target=df_loan_float["GB"])[2]
-    y_test = instance.split_xtrain_ytrain(df_loan_float, target=df_loan_float["GB"])[3]
-    x_test = instance.split_xtrain_ytrain(df_loan_float, target=df_loan_float["GB"])[1]
-
-    threshold = 0.47
-    randomstate = 42
-    ccpalpha = 0
-    threshold_1=0.0019
-    threshold_2=0.0021
-
-    # d = DecisionTree(custom_rcParams, imputer_cat, "machine", y_test,
-    #                     df_loan_float, df_loan_float["GB"], threshold, randomstate)
-
-    # f = d.dt_pruned_tree(0, [x_test.reset_index(drop=True).iloc[0]], x_test, y_test, ccpalpha, threshold_1, threshold_2)[4]
-    # plt.show()

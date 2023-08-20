@@ -65,14 +65,19 @@ class BaseStreamlit():
         self.legend_2 = st.markdown("<legend></legend>", unsafe_allow_html=True)
         self.legend_2 = st.markdown("<legend></legend>", unsafe_allow_html=True)
         self.classifier_name = st.sidebar.selectbox('Select classifier', classifier_name)
-        self.dataset_name = st.sidebar.selectbox('Select dataset', ('Logistic_KGB', 'Decision_KGB'))
+        # self.dataset_name = st.sidebar.selectbox('Select dataset', ('Logistic_KGB', 'Decision_KGB'))
 
 # ---------------------------------------------------------Logistic------------------------------------------------------------------
 
 class Logistic(ResidualsPlot, BreushPaganTest, NormalityTest, DurbinWatsonTest,
                PartialPlots, LevStudQuaRes, CooksDisQuantRes, ModelPerfomance):
 
-    def log_get_diagnostics(self, name):
+    def log_get_dataset(self, data):
+
+        st.dataframe(data)
+        st.write('Shape of independent variables training dataframe:', data.shape)
+
+    def log_get_diagnostics(self, name, ind_var):
 
         data = None
 
@@ -83,22 +88,21 @@ class Logistic(ResidualsPlot, BreushPaganTest, NormalityTest, DurbinWatsonTest,
 
         elif name=='Breush_Pagan_Test':
 
-            data = st.write('Breush_Pagan_Test',super().breush_pagan_quantile())
-            # data = super().breush_pagan_quantile()
+            st.write('Breush_Pagan_Test',super().breush_pagan_quantile())
 
         elif name=='Normal_Residual_Test':
 
-            st.write('Normal_Residual_Test',super().normality_test_quantile)
+            st.write('Normal_Residual_Test',super().normality_test_quantile())
             data = super().plot_normality_quantile()
 
         elif name=='Durbin_Watson_Test':
 
-            st.write('Durbin_Watson_Test',super().durbin_watson_quantile)        
+            st.write('Durbin_Watson_Test',super().durbin_watson_quantile())        
             data = super().plot_quantile_residuals()
 
         elif name=='Partial_Plots':
 
-            data = super().partial_plots_quantile()
+            data = super().partial_plots_quantile(ind_var)
 
         elif name=='Leverage_Studentized_Quantile_Res':
 
@@ -121,10 +125,6 @@ class Logistic(ResidualsPlot, BreushPaganTest, NormalityTest, DurbinWatsonTest,
         elif name=='Confusion Matrix':
 
             data = super().confusion_matrix_plot()
-        
-        else:
-
-            data = super().plot_quantile_residuals()
 
         return data
 
@@ -316,7 +316,7 @@ class Logistic(ResidualsPlot, BreushPaganTest, NormalityTest, DurbinWatsonTest,
 # ------------------------------------------------------main function (entry point) ------------------------------------------------------
 
 def main(custom_rcParams, x_test, y_test, df_nomiss_cat, type_,
-         df_loan_float, target, threshold, randomstate):
+         df_loan_float, target, ind_var, threshold, randomstate):
 
     basestreamlit = BaseStreamlit("Probabilty of Default Prediction",'data.png'
                                   ,"Various Perfomance Plots", ('Logistic', 'Decision'))
@@ -328,24 +328,39 @@ def main(custom_rcParams, x_test, y_test, df_nomiss_cat, type_,
 
     if classifier_name=='Logistic':
 
-        dataset_name = st.sidebar.selectbox('Select dataset', ('Logistic_KGB', 'Decision_KGB'), key=1)
-        # logistic.get_datasets(dataset_name)
+        logistic.log_get_dataset(data_stream.x_train)
         diagnostics_name=st.sidebar.selectbox('Select Diagnostic', ('Quantile Res','Breush_Pagan_Test','Normal_Residual_Test',
                                               'Durbin_Watson_Test','Partial_Plots','Leverage_Studentized_Quantile_Res',
                                               'Cooks_Distance_Quantile_Res'))
-        figure = logistic.log_get_diagnostics(diagnostics_name)
-        st.pyplot(figure)
+        figure = logistic.log_get_diagnostics(diagnostics_name, ind_var)
+
+        if diagnostics_name == "Breush_Pagan_Test":
+            pass
+
+        elif diagnostics_name == "Quantile Res" or "Normal_Residual_Test" or\
+                                "Durbin_Watson_Test" or "Partial_Plots" or "Leverage_Studentized_Quantile_Res" or\
+                                "Cooks_Distance_Quantile_Res":
+            st.pyplot(figure)
+
+        elif diagnostics_name == "Breush_Pagan_Test":
+            pass
+
+        perfomance_name = st.sidebar.selectbox('Select Perfomance', ('ROC Curve', 'Confusion Matrix'))
+        shape = logistic.log_get_perfomance(perfomance_name)
+        st.pyplot(shape)
+
         logistic.log_get_prediction()
 
     else:
 
         diagnostics_name=st.sidebar.selectbox('Select Graphs', ('Cross Validation Alpha', 'Confusion Matrix', 'Tree Plot'))
+        logistic.dec_get_dataset(data_stream.x_train)
         figure = decision.dec_get_perfomance(diagnostics_name, data_stream.ccpalpha)
         st.pyplot(figure)
         decision.dec_get_prediction()
 
 main(data_stream.custom_rcParams, data_stream.x_test, data_stream.y_test, data_stream.imputer_cat,
-     "machine", data_stream.df_loan_float, data_stream.df_loan_float["GB"], data_stream.threshold,
-      data_stream.randomstate)
+     "machine", data_stream.df_loan_float, data_stream.df_loan_float["GB"], data_stream.ind_var, 
+     data_stream.threshold, data_stream.randomstate)
 
 # -----------------------------------------------------------------Testing---------------------------------------------------------

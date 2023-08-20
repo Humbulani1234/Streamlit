@@ -7,15 +7,6 @@ from class_traintest import OneHotEncoding
 from class_base import Base
 from pd_download import data_cleaning
 from class_missing_values import ImputationCat
-import warnings
-
-#------------------------------------------------------Settings------------------------------------------------------
-
-pd.set_option("display.width", 1100)
-pd.set_option("display.max_columns", 1000)
-pd.set_option("display.max_rows", 1000)
-pd.set_option("display.float_format", lambda x: "%.0f" %x)
-warnings.filterwarnings("ignore")
 
 # -----------------------------------------------GLM BINOMIAL----------------------------------------------------
 
@@ -47,14 +38,12 @@ def glm_binomial_fit(y_train, x_train):
 
 if __name__ == "__main__":
 
-
     file_path = "./KGB.sas7bdat"
     data_types, df_loan_categorical, df_loan_float = data_cleaning(file_path)    
     miss = ImputationCat(df_cat=df_loan_categorical)
     imputer_cat = miss.simple_imputer_mode()
 
     custom_rcParams = {"figure.figsize": (8, 6), "axes.labelsize": 12}
-
 
     instance = OneHotEncoding(custom_rcParams, imputer_cat, "statistics")
     
@@ -63,16 +52,9 @@ if __name__ == "__main__":
     y_test = instance.split_xtrain_ytrain(df_loan_float, target=df_loan_float["GB"])[3]
     x_test = instance.split_xtrain_ytrain(df_loan_float, target=df_loan_float["GB"])[1]
 
-    print(x_test)
-
     x_test = sm.add_constant(x_test.values)
 
     y_train_shape = y_train.values.reshape(-1,1)
-    #print(y_train_shape)
 
     model = (glm_binomial_fit(y_train_shape, x_train))[1]
-    #print(model.predict(x_test))
-    
-    # with open('glm_binomial.pkl','wb') as file:
-    #     pickle.dump(model, file)
 

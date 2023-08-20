@@ -42,6 +42,9 @@ from glm_binomial import glm_binomial_fit
 
 # ----------------------------------------------------Base Class-----------------------------------------------------------
 
+with open('glm_binomial.pkl','rb') as file:
+        loaded_model = pickle.load(file)
+
 class QuantileResiduals(ModelPerfomance):
 
     def quantile_residuals(self):
@@ -193,7 +196,7 @@ class PartialPlots(QuantileResiduals):
        quantile_residuals_series = super().quantile_residuals()
        self.xlabel_name = ind_var.name
        self.axs.scatter(ind_var, quantile_residuals_series)
-       super()._plotting("Partial Plot", self.xlabel_name, "y")
+       super().plotting("Partial Plot", self.xlabel_name, "y")
         
        return self.fig
 
@@ -206,9 +209,9 @@ class LevStudQuaRes(QuantileResiduals):
        """ Outliers and Influence """
 
        self.fig, self.axs = plt.subplots(1,1)
-       res = self.function(self.x_train, self.y_train)[1]
+       # res = self.function(self.x_train, self.y_train)[1]
        quantile_residuals_series = super().quantile_residuals()
-       hat_matrix = np.round(res.get_hat_matrix_diag(),2)
+       hat_matrix = np.round(loaded_model.get_hat_matrix_diag(),2)
        self.lev_stud_res = []
 
        for i in range(len(quantile_residuals_series)):
@@ -216,7 +219,7 @@ class LevStudQuaRes(QuantileResiduals):
         self.lev_stud_res.append(quantile_residuals_series[i]/(sqrt(1-hat_matrix[i])))
 
        self.axs.plot(pd.Series(self.lev_stud_res).index, pd.Series(self.lev_stud_res).values)
-       super()._plotting("Leverage Studentised Residuals", "x", "y")
+       super().plotting("Leverage Studentised Residuals", "x", "y")
         
        return self.fig
 
@@ -229,9 +232,9 @@ class CooksDisQuantRes(QuantileResiduals):
         """ Cooks Distance Plot """
 
         self.fig, self.axs = plt.subplots(1,1)
-        res = self.function(self.x_train, self.y_train)[1]
+        # res = self.function(self.x_train, self.y_train)[1]
         quantile_residuals_series = super().quantile_residuals()
-        hat_matrix = np.round(res.get_hat_matrix_diag(),2)
+        hat_matrix = np.round(loaded_model.get_hat_matrix_diag(),2)
         self.d = []
 
         for i in range(len(quantile_residuals_series)):
@@ -239,65 +242,8 @@ class CooksDisQuantRes(QuantileResiduals):
             self.d.append((quantile_residuals_series[i]**2/3000)*(hat_matrix[i]/(1-hat_matrix[i])))
 
         self.axs.plot(pd.Series(self.d).index, pd.Series(self.d).values)
-        super()._plotting("Leverage Studentised Residuals", "x", "y")
+        super().plotting("Leverage Studentised Residuals", "x", "y")
 
         return self.fig
 
-# -----------------------------------------------Testing-------------------------------------------
-
-# if __name__ == "__main__":
-
-#     file_path = "./KGB.sas7bdat"
-#     data_types, df_loan_categorical, df_loan_float = data_cleaning(file_path)    
-#     miss = ImputationCat(df_cat=df_loan_categorical)
-#     imputer_cat = miss.simple_imputer_mode()
-#     #print(imputer_cat)
-#     to_view = miss.concatenate_total_df(df_loan_float, imputer_cat)
-
-#     #print(to_use)
-
-#     # custom_rcParams = {"figure.figsize": (8, 6), "axes.labelsize": 12}
-
-#     custom_rcParams = {"figure.figsize": (8, 6), "axes.labelsize": 12}
-
-#     instance = OneHotEncoding(custom_rcParams, imputer_cat, "statistics")
-#     #instance.sample_imbalance(df_loan_float, df_loan_float["GB"])
-    
-#     x_train = instance.split_xtrain_ytrain(df_loan_float, target=df_loan_float["GB"])[0]
-#     y_train = instance.split_xtrain_ytrain(df_loan_float, target=df_loan_float["GB"])[2]
-#     y_test = instance.split_xtrain_ytrain(df_loan_float, target=df_loan_float["GB"])[3]
-#     x_test = instance.split_xtrain_ytrain(df_loan_float, target=df_loan_float["GB"])[1]
-
-#     #pdb.set_trace()
-
-#     x_test = sm.add_constant(x_test.values)
- 
-#     #pdb.set_trace()
-
-#     y_train_shape = y_train.values.reshape(-1,1)
-
-#     #pdb.set_trace()
-
-#     m = (glm_binomial_fit(y_train_shape, x_train))[1]
-
-#     a = m.predict(x_test).round(10)
-
-#     # Model Perfomance
-    
-#     threshold = 0.47
-#     func = glm_binomial_fit
-
-#     p = ModelPerfomance(custom_rcParams, x_test, y_test, threshold)
-#     #c = p.confusion_matrix_plot()
-#     #r = p.confusion_matrix_plot()
-#     #plt.show()
-
-#     # Diagnostics
-    
-#     # a = QuantileResiduals(custom_rcParams, func, x_test, y_test, x_train, y_train, threshold)
-#     # b = a.quantile_residuals()
-#     # print(r)
-
-#     b = ResidualsPlot(custom_rcParams, x_test, y_test, threshold)
-#     c = b.plot_quantile_residuals()
-#     plt.show()
+# -----------------------------------------------Testing------------------------------------------------------------------

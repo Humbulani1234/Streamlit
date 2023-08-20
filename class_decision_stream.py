@@ -17,15 +17,14 @@ from pd_download import data_cleaning
 from class_missing_values import ImputationCat
 from class_decision_tree import DecisionTree
  
-# rom data_stream import settings
-
-# ---------------------------------------------Settings ---------------------------------------------------------------
- 
-# settings()
-
 # ---------------------------------------------------------------DecisionStream--------------------------------------------------
 
 class DecisionStream(DecisionTree):
+
+    def dec_get_dataset(self, data):
+
+        st.dataframe(data)
+        st.write('Shape of independent variables training dataframe:', data.shape)
 
     def dec_get_perfomance(self, name, ccpalpha):
 
@@ -35,14 +34,15 @@ class DecisionStream(DecisionTree):
 
             data = super().cross_validate_alphas(ccpalpha)[1]
 
-
         elif name=='Confusion_matrix_plot_DT':
 
-            data = super().dt_pruned_tree()[3]
+            data = super().dt_pruned_tree(0, [x_test.reset_index(drop=True).iloc[0]], x_test, y_test, ccpalpha,
+                                          threshold_1, threshold_2)[3]
 
         else:
 
-            data = super().dt_pruned_tree()[4]
+            data = super().dt_pruned_tree(0, [x_test.reset_index(drop=True).iloc[0]], x_test, y_test, ccpalpha,
+                                          threshold_1, threshold_2)[4]
 
         return data
 
@@ -241,23 +241,3 @@ class DecisionStream(DecisionTree):
 
             st.subheader('Customer {} probability of default is: {}'.format(NAME , prediction))
             st.success('Successfully executed the model')  
-
-# ------------------------------------------------------main function (entry point) ------------------------------------------------------
-
-# def main(custom_rcParams, x_test, y_test, threshold):
-
-#     decsion = Decsion(custom_rcParams, x_test, y_test, threshold)
-#     classifier_name = basestreamlit.classifier_name
-
-
-#     if classifier_name=='Decision':
-
-#         diagnostics_name=st.sidebar.selectbox('Select Graphs', ('Cross Validation Alpha', 'Confusion Matrix', 'Tree Plot'))
-#         figure = logistic.dec_get_perfomance(diagnostics_name)
-#         st.pyplot(figure)
-#         logistic.dec_get_prediction()
-
-# main(custom_rcParams , x_test, y_test, threshold)
-
-# -----------------------------------------------------------------Testing---------------------------------------------------------
- 
