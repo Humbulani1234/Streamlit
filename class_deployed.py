@@ -33,10 +33,6 @@ from class_decision_stream import DecisionStream
 import data_stream
 from class_decision_tree import DecisionTree
 
-# ---------------------------------------------Settings ---------------------------------------------------------------
- 
-data_stream.settings()
-
 # -------------------------------------------------------------------BaseClass--------------------------------------------------------
 
 class BaseStreamlit():
@@ -65,7 +61,6 @@ class BaseStreamlit():
         self.legend_2 = st.markdown("<legend></legend>", unsafe_allow_html=True)
         self.legend_2 = st.markdown("<legend></legend>", unsafe_allow_html=True)
         self.classifier_name = st.sidebar.selectbox('Select classifier', classifier_name)
-        # self.dataset_name = st.sidebar.selectbox('Select dataset', ('Logistic_KGB', 'Decision_KGB'))
 
 # ---------------------------------------------------------Logistic------------------------------------------------------------------
 
@@ -338,8 +333,8 @@ def main(custom_rcParams, x_test, y_test, df_nomiss_cat, type_,
             pass
 
         elif diagnostics_name == "Quantile Res" or "Normal_Residual_Test" or\
-                                "Durbin_Watson_Test" or "Partial_Plots" or "Leverage_Studentized_Quantile_Res" or\
-                                "Cooks_Distance_Quantile_Res":
+                                 "Durbin_Watson_Test" or "Partial_Plots" or "Leverage_Studentized_Quantile_Res" or\
+                                 "Cooks_Distance_Quantile_Res":
             st.pyplot(figure)
 
         elif diagnostics_name == "Breush_Pagan_Test":
@@ -354,8 +349,10 @@ def main(custom_rcParams, x_test, y_test, df_nomiss_cat, type_,
     else:
 
         diagnostics_name=st.sidebar.selectbox('Select Graphs', ('Cross Validation Alpha', 'Confusion Matrix', 'Tree Plot'))
-        logistic.dec_get_dataset(data_stream.x_train)
-        figure = decision.dec_get_perfomance(diagnostics_name, data_stream.ccpalpha)
+        decision.dec_get_dataset(data_stream.x_train)
+        figure = decision.dec_get_perfomance(diagnostics_name,
+                                             data_stream.x_test_orig, data_stream.y_test_orig, data_stream.ccpalpha,
+                                             data_stream.threshold_1, data_stream.threshold_2)
         st.pyplot(figure)
         decision.dec_get_prediction()
 

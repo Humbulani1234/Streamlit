@@ -137,27 +137,47 @@ class DecisionTree(OneHotEncoding):
         
         return ideal_ccp_alpha[0]
 
-    def dt_pruned_tree(self, sample, x_test1, x_test, y_test, ccpalpha, threshold_1, threshold_2):
-
+    def dt_pruned_alpha(self, ccpalpha, threshold_1, threshold_2):
 
         """ Ideal alpha value for pruning the tree """
 
         ideal_ccp_alpha = self.ideal_alpha(ccpalpha, threshold_1, threshold_2)
 
+        return ideal_ccp_alpha
+
+    def dt_pruned_fit(self, ccpalpha, threshold_1, threshold_2):
+
         """ Pruned tree fitting """
 
-        pruned_clf_dt = self.dt_classification_fit(ideal_ccp_alpha)
+        ideal_ccp_alpha = self.dt_pruned_alpha(ccpalpha, threshold_1, threshold_2)
+        pruned_clf_dt = self.ideal_alpha(ideal_ccp_alpha)
+
+        return pruned_clf_dt
+
+    def dt_pruned_prediction(self, ccpalpha, threshold_1, threshold_2, sample, x_test1):
 
         """ Prediction and perfomance analytics """
 
+        ideal_ccp_alpha = self.dt_pruned_alpha(ccpalpha, threshold_1, threshold_2)
         pruned_predict_dt = self.dt_probability_prediction(sample, x_test1, ideal_ccp_alpha)
+
+        return pruned_predict_dt
+
+    def dt_pruned_confmatrix(self, ccpalpha, threshold_1, threshold_2, x_test, y_test):
 
         """ Confusion matrix plot """
 
+        ideal_ccp_alpha = self.dt_pruned_alpha(ccpalpha, threshold_1, threshold_2)
         pruned_confusion_matrix = self.dt_confusion_matrix_plot(x_test, y_test, ideal_ccp_alpha)
+
+        return pruned_confusion_matrix
+
+
+    def dt_pruned_tree(self, ccpalpha, threshold_1, threshold_2):
 
         """ Plot final tree """
 
+        ideal_ccp_alpha = self.dt_pruned_alpha(ccpalpha, threshold_1, threshold_2)
         pruned_plot_tree = self.plot_dt(ideal_ccp_alpha)
 
-        return ideal_ccp_alpha, pruned_clf_dt, pruned_predict_dt, pruned_confusion_matrix, pruned_plot_tree  
+        return pruned_plot_tree  

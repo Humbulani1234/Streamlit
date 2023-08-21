@@ -26,7 +26,8 @@ class DecisionStream(DecisionTree):
         st.dataframe(data)
         st.write('Shape of independent variables training dataframe:', data.shape)
 
-    def dec_get_perfomance(self, name, ccpalpha):
+    def dec_get_perfomance(self, name, x_test_orig, y_test_orig,
+                           ccpalpha, threshold_1, threshold_2):
 
         data = None
 
@@ -34,15 +35,13 @@ class DecisionStream(DecisionTree):
 
             data = super().cross_validate_alphas(ccpalpha)[1]
 
-        elif name=='Confusion_matrix_plot_DT':
+        elif name=='Confusion Matrix':
 
-            data = super().dt_pruned_tree(0, [x_test.reset_index(drop=True).iloc[0]], x_test, y_test, ccpalpha,
-                                          threshold_1, threshold_2)[3]
+            data = super().dt_pruned_confmatrix(ccpalpha, threshold_1, threshold_2, x_test_orig, y_test_orig)
 
         else:
 
-            data = super().dt_pruned_tree(0, [x_test.reset_index(drop=True).iloc[0]], x_test, y_test, ccpalpha,
-                                          threshold_1, threshold_2)[4]
+            data = super().dt_pruned_tree(ccpalpha, threshold_1, threshold_2)
 
         return data
 
