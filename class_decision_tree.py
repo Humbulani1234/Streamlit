@@ -124,6 +124,8 @@ class DecisionTree(OneHotEncoding):
         
         alpha_results = pd.DataFrame(alpha_loop_values, columns=["alpha", "mean_accuracy", "std"])
         alpha_results.plot(ax = self.axs, x = "alpha", y = "mean_accuracy", yerr = "std", marker = "o" , linestyle = "--")
+        self.axs.spines["top"].set_visible(False)  
+        self.axs.spines["right"].set_visible(False) 
         
         return alpha_results, self.fig
 

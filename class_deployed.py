@@ -4,6 +4,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import warnings
 import pandas as pd
+import numpy as np
 from PIL import Image
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from scipy.stats import norm
@@ -298,15 +299,16 @@ class Logistic(ResidualsPlot, BreushPaganTest, NormalityTest, DurbinWatsonTest,
                       Food_Building_Ca, Military_Service, Others, Pensioner, Sea_Vojage_Gast, Self_employed_pe, Car, 
                       Car_and_Motor_bi, American_Express, Cheque_card, Mastercard_Euroc, Other_credit_car, VISA_Others, VISA_mybank]
             
-            inputs2 = [CHILDREN, PERS_H, AGE, TMADD, TMJOB1, TEL, NMBLOAN, FINLOAN, INCOME, EC_CARD, INC, INC1, BUREAU
+            inputs2 = [1, CHILDREN, PERS_H, AGE, TMADD, TMJOB1, TEL, NMBLOAN, FINLOAN, INCOME, EC_CARD, INC, INC1, BUREAU
                       ,LOCATION, LOANS, REGN, DIV, CASH]    
 
             list_ = inputs2 + inputs1
             inputs = np.array(list_).reshape(1,-1)
-            answer = np.array(data.loaded_model.predict(inputs.reshape(1,-1))) 
+            answer = np.array(data_stream.loaded_model.predict(inputs.reshape(1,-1)))
+            answer = "{: .10f}".format(answer[0]) 
 
-            st.subheader('Customer {} probability of default is: {}'.format(NAME , prediction))
-            st.success('Successfully executed the model')
+            st.sidebar.subheader('Customer {} probability of default is: {}'.format(NAME , answer))
+            st.sidebar.success('Successfully executed the model')
             
 # ------------------------------------------------------main function (entry point) ------------------------------------------------------
 

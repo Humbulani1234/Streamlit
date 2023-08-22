@@ -22,6 +22,9 @@ from class_missing_values import ImputationCat
 from class_diagnostics import (ResidualsPlot, BreushPaganTest, NormalityTest, DurbinWatsonTest,
                                PartialPlots, LevStudQuaRes, CooksDisQuantRes)
 from class_modelperf import ModelPerfomance
+from class_decision_tree import DecisionTree
+
+#----------------------------------------------------------Globals----------------------------------------------------
 
 with open('glm_binomial.pkl','rb') as file:
         loaded_model = pickle.load(file)
@@ -55,6 +58,9 @@ randomstate = 42
 ccpalpha = 0
 threshold_1=0.0019
 threshold_2=0.0021
+
+d = DecisionTree(custom_rcParams, imputer_cat, "machine", y_test_orig,
+                 df_loan_float, df_loan_float["GB"], threshold, randomstate)
 
 def settings():
 

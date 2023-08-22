@@ -3,6 +3,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import warnings
 import pandas as pd
+import numpy as np
 from PIL import Image
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 from math import *
@@ -16,6 +17,7 @@ from class_base import Base
 from pd_download import data_cleaning
 from class_missing_values import ImputationCat
 from class_decision_tree import DecisionTree
+import data_stream
  
 # ---------------------------------------------------------------DecisionStream--------------------------------------------------
 
@@ -93,17 +95,12 @@ class DecisionStream(DecisionTree):
 
         if button_clicked:   
         
-            TITLE = form.cleaned_data.get("TITLE")
             R,H = 0,0
             if TITLE == 'H':
                 H=1
                 # list_.append(H)
             else:
                 R=0
-                # list_.append(H)
-            #input_ = [H]
-            #
-            STATUS = form.cleaned_data.get("STATUS")
 
             W,V, U, G, E, T = 0,0,0,0,0,0    
 
@@ -120,8 +117,6 @@ class DecisionStream(DecisionTree):
             else:
                 W = 0 
 
-            PRODUCT = form.cleaned_data.get("PRODUCT") 
-
             Radio_TV_Hifi, Furniture_Carpet, Dept_Store_Mail, Leisure,Cars, OT = 0,0,0,0,0,0    
 
             if PRODUCT=='Furniture_Carpet':
@@ -137,8 +132,6 @@ class DecisionStream(DecisionTree):
             else:
                 Radio_TV_Hifi = 0   
 
-            RESID = form.cleaned_data.get("RESID")
-
             Owner,Lease = 0,0    
 
             if RESID=='Lease':
@@ -146,8 +139,6 @@ class DecisionStream(DecisionTree):
 
             else:
                 Owner=0
-
-            NAT = form.cleaned_data.get("NAT")
 
             Yugoslav,German, Turkish, RS, Greek ,Italian, Other_European, Spanish_Portugue = 0,0,0,0,0,0,0,0    
 
@@ -167,8 +158,6 @@ class DecisionStream(DecisionTree):
                 Spanish_Portugue=1
             else:
                 Yugoslav = 1 
-
-            PROF = form.cleaned_data.get("PROF")  
 
             State_Steel_Ind,Others, Civil_Service_M , Self_employed_pe, Food_Building_Ca, Chemical_Industr\
             ,Pensioner ,Sea_Vojage_Gast, Military_Service = 0,0,0,0,0,0,0,0,0    
@@ -190,9 +179,7 @@ class DecisionStream(DecisionTree):
             elif PROF=='Military_Service':
                 Military_Service=1
             else:
-                State_Steel_Ind = 1 
-
-            CAR = form.cleaned_data.get("CAR")   
+                State_Steel_Ind = 1  
 
             Without_Vehicle,Car,Car_and_Motor_bi= 0,0,0    
 
@@ -205,8 +192,6 @@ class DecisionStream(DecisionTree):
 
             Cheque_card,no_credit_cards, Mastercard_Euroc, VISA_mybank,VISA_Others\
             ,Other_credit_car, American_Express = 0,0,0,0,0,0,0  
-
-            CARDS = form.cleaned_data.get("CARDS")  
 
             if CARDS=='no_credit_cards':
                 no_credit_cards=1
@@ -236,7 +221,8 @@ class DecisionStream(DecisionTree):
             list_ = inputs2 + inputs1
 
             inputs = np.array([list_]).reshape(1,-1)           
-            answer = d.dt_pruned_tree(0, inputs, x_test, y_test, ccpalpha, threshold_1, threshold_2)[2]
+            answer = data_stream.d.dt_pruned_prediction(data_stream.ccpalpha, data_stream.threshold_1, data_stream.threshold_2,
+                                                        data_stream.sample, inputs)
 
-            st.subheader('Customer {} probability of default is: {}'.format(NAME , prediction))
-            st.success('Successfully executed the model')  
+            st.sidebar.subheader('Customer {} probability of default is: {}'.format(NAME , answer))
+            st.sidebar.success('Successfully executed the model')  
